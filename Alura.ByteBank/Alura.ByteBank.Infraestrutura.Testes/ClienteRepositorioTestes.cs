@@ -1,30 +1,37 @@
 ﻿using Alura.ByteBank.Dados.Repositorio;
 using Alura.ByteBank.Dominio.Entidades;
+using Alura.ByteBank.Dominio.Interfaces.Repositorios;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Alura.ByteBank.Infraestrutura.Testes
 {
     public class ClienteRepositorioTestes
     {
-         private ClienteRepositorio _repositorio;
+        private readonly IClienteRepositorio _clienteRepositorio;
 
-         [Fact]
+        public ClienteRepositorioTestes()
+        {
+            //Injetando dependências no contrutor;
+            var servico = new ServiceCollection();
+            servico.AddTransient<IClienteRepositorio, ClienteRepositorio>();
+            var provedor = servico.BuildServiceProvider();
+            _clienteRepositorio = provedor.GetService<IClienteRepositorio>();
+            
+        }
+
+        [Fact]
          public void TestaObterTodosClientes()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
-            List<Cliente> lista = _repositorio.ObterTodos();
+            List<Cliente> lista = _clienteRepositorio.ObterTodos();
 
             //Assert
             Assert.NotNull(lista);
+            Assert.Equal(3, lista.Count);
 
         }
 
@@ -32,10 +39,8 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         public void TestaObterClientesPorId()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
-            var cliente = _repositorio.ObterPorId(1);
+            var cliente = _clienteRepositorio.ObterPorId(1);
 
             //Assert
             Assert.NotNull(cliente);
@@ -46,14 +51,11 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        [InlineData(4)]
         public void TestaObterClientesPorVariosId(int id)
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
-            var cliente = _repositorio.ObterPorId(id);
+            var cliente = _clienteRepositorio.ObterPorId(id);
 
             //Assert
             Assert.NotNull(cliente);
@@ -64,13 +66,12 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         public void TestaAtualizacaoInformacaoDeterminadoCliente()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-            var cliente = _repositorio.ObterPorId(2);
+            var cliente = _clienteRepositorio.ObterPorId(2);
             var nomeNovo = "João Pedro";
             cliente.Nome = nomeNovo;
 
             //Act
-            var atualizado = _repositorio.Atualizar(2,cliente);
+            var atualizado = _clienteRepositorio.Atualizar(2,cliente);
 
             //Assert
             Assert.True(atualizado);
