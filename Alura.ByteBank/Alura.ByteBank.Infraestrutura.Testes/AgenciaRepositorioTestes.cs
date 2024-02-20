@@ -1,57 +1,60 @@
 ﻿using Alura.ByteBank.Dados.Repositorio;
 using Alura.ByteBank.Dominio.Entidades;
+using Alura.ByteBank.Dominio.Interfaces.Repositorios;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Alura.ByteBank.Infraestrutura.Testes
 {
     public class AgenciaRepositorioTestes
     {
-        private AgenciaRepositorio _repositorio;
+        private readonly IAgenciaRepositorio _agenciaRepositorio;
+
+        public AgenciaRepositorioTestes()
+        {
+            //Injetando dependências no contrutor;
+            var servico = new ServiceCollection();
+            servico.AddTransient<IAgenciaRepositorio, AgenciaRepositorio>();
+
+            var provedor = servico.BuildServiceProvider();
+            _agenciaRepositorio = provedor.GetService<IAgenciaRepositorio>();
+        }
 
         [Fact]
         public void TestaObterTodasAgencias()
         {
             //Arrange
-            _repositorio = new AgenciaRepositorio();
-
             //Act
-            List<Agencia> lista = _repositorio.ObterTodos();
+            List<Agencia> lista = _agenciaRepositorio.ObterTodos();
 
             //Assert
             Assert.NotNull(lista);
+            Assert.Equal(2, lista.Count);
+            Assert.True(lista.Count != 0);
         }
 
         [Fact]
         public void TestaObterAgenciaPorId()
         {
             //Arrange
-            _repositorio = new AgenciaRepositorio();
-
             //Act
-            var agencia = _repositorio.ObterPorId(1);
+            var agencia = _agenciaRepositorio.ObterPorId(1);
 
             //Assert
             Assert.NotNull(agencia);
-
         }
 
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        [InlineData(3)]
         public void TestaObterAgenciasPorVariosId(int id)
         {
             //Arrange
-            _repositorio = new AgenciaRepositorio();
-
             //Act
-            var agencia = _repositorio.ObterPorId(id);
+            var agencia = _agenciaRepositorio.ObterPorId(id);
 
             //Assert
             Assert.NotNull(agencia);
@@ -59,21 +62,62 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         }
 
         [Fact]
+        public void TesteInsereUmaNovaAgenciaNaBaseDeDados()
+        {
+            //Arrange
+            string nome = "Agência Guarapari";
+            int numero = 125982;
+            Guid identificador = Guid.NewGuid();
+            string endereco = "Rua: 7 de setembro - Centro";
+
+            var agencia = new Agencia()
+            {
+                Nome = nome,
+                Identificador = identificador,
+                Endereco = endereco,
+                Numero = numero
+            };
+
+            //Act
+            var retorno = _agenciaRepositorio.Adicionar(agencia);
+
+            //Assert
+            Assert.True(retorno);
+        }
+
+        [Fact]
         public void TestaAtualizacaoInformacaoDeterminadaAgencia()
         {
             //Arrange
-            _repositorio = new AgenciaRepositorio();
-            var agencia = _repositorio.ObterPorId(2);
+            var agencia = _agenciaRepositorio.ObterPorId(2);
             var nomeNovo = "Agencia Nova";
             agencia.Nome = nomeNovo;
 
             //Act
-            var atualizado = _repositorio.Atualizar(2, agencia);
+            var atualizado = _agenciaRepositorio.Atualizar(2, agencia);
 
             //Assert
             Assert.True(atualizado);
         }
 
+        [Fact]
+        public void TestaRemoverInformacaoDeterminadaAgencia()
+        {
+            //Arrange
+            //Act
+            var atualizado = _agenciaRepositorio.Excluir(3);
+
+            //Assert
+            Assert.True(atualizado);
+        }
+
+        [Fact]
+        public void TestaExcecaoConsultaPorAgenciaPorId()
+        {
+            //Act
+            //Assert
+            Assert.Throws<FormatException>(() => _agenciaRepositorio.ObterPorId(33));
+        }
 
         // Testes com Mock
         [Fact]

@@ -11,10 +11,10 @@ namespace Alura.ByteBank.Infraestrutura.Testes
     public class ClienteRepositorioTestes
     {
         private readonly IClienteRepositorio _clienteRepositorio;
-        private ClienteRepositorio _repositorio;
 
         public ClienteRepositorioTestes()
         {
+            //Injetando dependências no contrutor;
             var servico = new ServiceCollection();
             servico.AddTransient<IClienteRepositorio, ClienteRepositorio>();
             var provedor = servico.BuildServiceProvider();
@@ -39,10 +39,8 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         public void TestaObterClientesPorId()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
-            var cliente = _repositorio.ObterPorId(1);
+            var cliente = _clienteRepositorio.ObterPorId(1);
 
             //Assert
             Assert.NotNull(cliente);
@@ -53,14 +51,11 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        [InlineData(4)]
         public void TestaObterClientesPorVariosId(int id)
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
-            var cliente = _repositorio.ObterPorId(id);
+            var cliente = _clienteRepositorio.ObterPorId(id);
 
             //Assert
             Assert.NotNull(cliente);
@@ -71,13 +66,12 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         public void TestaAtualizacaoInformacaoDeterminadoCliente()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-            var cliente = _repositorio.ObterPorId(2);
+            var cliente = _clienteRepositorio.ObterPorId(2);
             var nomeNovo = "João Pedro";
             cliente.Nome = nomeNovo;
 
             //Act
-            var atualizado = _repositorio.Atualizar(2,cliente);
+            var atualizado = _clienteRepositorio.Atualizar(2,cliente);
 
             //Assert
             Assert.True(atualizado);

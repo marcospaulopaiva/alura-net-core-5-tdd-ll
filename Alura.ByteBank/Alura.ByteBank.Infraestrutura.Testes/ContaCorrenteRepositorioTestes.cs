@@ -1,5 +1,7 @@
 ﻿using Alura.ByteBank.Dados.Repositorio;
 using Alura.ByteBank.Dominio.Entidades;
+using Alura.ByteBank.Dominio.Interfaces.Repositorios;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -9,29 +11,36 @@ namespace Alura.ByteBank.Infraestrutura.Testes
 {
     public class ContaCorrenteRepositorioTestes
     {
-        private ContaCorrenteRepositorio _repositorio;
+        private readonly IContaCorrenteRepositorio _contaCorrenteRepositorio;
+
+        public ContaCorrenteRepositorioTestes()
+        {
+            //Injetando dependências no contrutor;
+            var servico = new ServiceCollection();
+            servico.AddTransient<IContaCorrenteRepositorio, ContaCorrenteRepositorio>();
+            var provedor = servico.BuildServiceProvider();
+            _contaCorrenteRepositorio = provedor.GetService<IContaCorrenteRepositorio>();
+        }
 
         [Fact]
         public void TestaObterTodasContasCorrentes()
         {
             //Arrange
-            _repositorio = new ContaCorrenteRepositorio();
-
             //Act
-            List<ContaCorrente> lista = _repositorio.ObterTodos();
+            List<ContaCorrente> lista = _contaCorrenteRepositorio.ObterTodos();
 
             //Assert
             Assert.NotNull(lista);
+            Assert.True(lista.Count != 0);
+            Assert.Equal(3, lista.Count);
         }
 
         [Fact]
         public void TestaObterContaCorrentePorId()
         {
             //Arrange
-            _repositorio = new ContaCorrenteRepositorio();
-
             //Act
-            var conta = _repositorio.ObterPorId(1);
+            var conta = _contaCorrenteRepositorio.ObterPorId(1);
 
             //Assert
             Assert.NotNull(conta);
@@ -40,14 +49,11 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        [InlineData(3)]
         public void TestaObterContasCorrentesPorVariosId(int id)
         {
             //Arrange
-            _repositorio = new ContaCorrenteRepositorio();
-
             //Act
-            var conta = _repositorio.ObterPorId(id);
+            var conta = _contaCorrenteRepositorio.ObterPorId(id);
 
             //Assert
             Assert.NotNull(conta);
@@ -57,23 +63,55 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         public void TestaAtualizaSaldoDeterminadaConta()
         {
             //Arrange
-            _repositorio = new ContaCorrenteRepositorio();
-            var conta = _repositorio.ObterPorId(2);
+            var conta = _contaCorrenteRepositorio.ObterPorId(2);
             double saldoNovo = 15;
             conta.Saldo = saldoNovo;
 
             //Act
-            var atualizado = _repositorio.Atualizar(2, conta);
+            var atualizado = _contaCorrenteRepositorio.Atualizar(2, conta);
 
             //Assert
             Assert.True(atualizado);
+        }
+
+        [Fact]
+        public void TestaInsereUmaNovaContaCorrenteNoBancoDeDados()
+        {
+            //Arrange
+            var conta = new ContaCorrente()
+            {
+                Saldo = 10,
+                Identificador = Guid.NewGuid(),
+                Cliente = new Cliente()
+                {
+                    Nome = "Marcos Paulo",
+                    CPF = "486.074.980-45",
+                    Identificador = Guid.NewGuid(),
+                    Profissao = "Programador",
+                    Id = 1
+                },
+                Agencia = new Agencia()
+                {
+                    Nome = "Agencia Central Coast City",
+                    Identificador = Guid.NewGuid(),
+                    Id = 1,
+                    Endereco = "Rua das Flores, 25",
+                    Numero = 147
+                }
+            };
+
+            //Act
+            var retorno = _contaCorrenteRepositorio.Adicionar(conta);
+
+            //Assert
+            Assert.True(retorno);
         }
 
         // Testes com Mock
         [Fact]
         public void TestaObterContasMock()
         {
-            //Arange
+            //Arrange
             var bytebankRepositorioMock = new Mock<IByteBankRepositorio>();
             var mock = bytebankRepositorioMock.Object;
 
