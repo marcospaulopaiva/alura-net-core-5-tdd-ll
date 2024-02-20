@@ -121,20 +121,6 @@ namespace Alura.ByteBank.Infraestrutura.Testes
 
         // Testes com Mock
         [Fact]
-        public void TestaObterAgenciasMock()
-        {
-            //Arange
-            var bytebankRepositorioMock = new Mock<IByteBankRepositorio>();
-            var mock = bytebankRepositorioMock.Object;
-
-            //Act
-            var lista = mock.BuscarAgencias();
-
-            //Assert
-            bytebankRepositorioMock.Verify(b => b.BuscarAgencias());
-        }
-
-        [Fact]
         public void TestaAdiconarAgenciaMock()
         {
             // Arrange
@@ -154,6 +140,20 @@ namespace Alura.ByteBank.Infraestrutura.Testes
 
             //Assert
             Assert.True(adicionado);
+        }
+
+        [Fact]
+        public void TestaObterAgenciasMock()
+        {
+            //Arange
+            var bytebankRepositorioMock = new Mock<IByteBankRepositorio>();
+            var mock = bytebankRepositorioMock.Object;
+
+            //Act
+            var lista = mock.BuscarAgencias();
+
+            //Assert
+            bytebankRepositorioMock.Verify(b => b.BuscarAgencias());
         }
     }
 }
